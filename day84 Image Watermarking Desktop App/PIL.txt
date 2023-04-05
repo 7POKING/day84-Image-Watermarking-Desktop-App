@@ -1,0 +1,92 @@
+參考網址: https://ithelp.ithome.com.tw/articles/10226578
+------------------------------------------------------------
+修改突變尺寸
+我們可以透過 resize() 方法重新設定影像尺寸，第一個參數輸入(寬,高)，第二個參數可輸可不輸，預設為 Image.BILINEAR，注意這個改變尺寸的方法不會自己幫我們等比例縮放，所以我們要算出正確的比例，如下列程式碼中ratio = float(width)/im.size[0] 的部分。
+
+from PIL import Image
+
+im = Image.open("test.jpg")
+print (im.size)
+width = 400
+ratio = float(width)/im.size[0]
+height = int(im.size[1]*ratio)
+nim = im.resize( (width, height), Image.BILINEAR )
+print (nim.size)
+nim.save("test_resized.jpg")
+
+-----------------------------------------------------------
+JPG 壓縮
+就在剛剛要上傳原圖的時候我發現檔案高達5MB，但上傳限制是2MB，就想說既然要壓縮就用 PIL 來壓縮吧! 壓縮的做法和轉檔很像，只是多設定了品質參數而已。
+save()函式中加入 quality=80, subsampling=0這兩個參數即可壓縮檔案，通常 quality 會設定80或90。
+
+from PIL import Image
+
+img = Image.open("test.jpg")
+img.save("test_c.jpg",quality=65, subsampling=0)
+
+-----------------------------------------------------------
+圖片旋轉
+圖片旋轉也是很常用的功能，我來介紹一下吧，透過 transpose() 方法可以轉換圖片方向，該方法會回傳處理完的圖片，所以要用一個變數去接，transpose 內支援下面五種參數
+
+Image.FLIP_LEFT_RIGHT (左右翻轉)
+Image.FLIP_TOP_DOWN (上下翻轉)
+Image.ROTATE_90 (旋轉90度)
+Image.ROTATE_180 (旋轉180度)
+Image.ROTATE_270 (旋轉270度)
+from PIL import Image
+
+img = Image.open("test.jpg")
+imgR = img.transpose(Image.ROTATE_180)
+imgR.save("test_R180.jpg")
+
+-----------------------------------------------------------
+可以使用在匯入後顯示在頁面上
+製作縮圖
+PIL有一個專門製作縮圖的方法thumbnail()，它會自動進行等比例縮放，並且選擇你傳入的長寬裡比較小的那個數據，執行速度也比 resize() 快
+
+from PIL import Image
+
+img = Image.open( "test.jpg" )
+img.thumbnail( (400,100) ) #指定長與寬並進行縮圖製作
+img.save( "test_thumbnail.jpg" )
+print (img.size)
+
+-----------------------------------------------------------
+加入濾鏡
+透過 img.fliter() 即可加入濾鏡，參數則是傳入想要加上的濾鏡，例如這邊是img.filter(ImageFilter.FIND_EDGES)，他會回傳處理好的影像，所以也需要一個變數來接。
+
+from PIL import Image
+from PIL import ImageFilter
+
+img = Image.open("test_resized.jpg")
+img_f = img.filter(ImageFilter.FIND_EDGES) #IMageFilter.FIND_EDGES加入的功能 
+img_f.save("test_rf.jpg")
+
+--------------------------------------------------------
+將圖片的背景轉為透明
+https://clay-atlas.com/blog/2019/11/23/python-chinese-tutorial-pillow-image-transparency/
+ 提到RGBA
+字尾Ａ是alpha值，是透明標記，可調整顏色透明度
+
+ＲＧＢＡ名詞解釋
+https://pillow-zh-cn.readthedocs.io/zh_CN/latest/handbook/concepts.html#id6
+
+--------------------------------------------------------
+將圖片整個變透明
+Set uniform transparency over the entire surface
+If you set an integer value to alpha, the transparency according to the value will be set on the entire surface.
+
+Note that putalpha() overwrites the original image, so if you want to keep the original image as it is, use the one copied with copy().
+
+im_rgba = im_rgb.copy()
+im_rgba.putalpha(128)
+im_rgba.save('data/dst/pillow_putalpha_solid.png')
+source: pillow_putalpha.py
+Python Pillow putalpha solid
+
+In this example, alpha=128 gives about 50% transparency (128 / 255 ~ 50%).
+
+-----------------------------------------------------------
+圖重複與放上圖
+詳解
+https://automatetheboringstuff.com/chapter17/
